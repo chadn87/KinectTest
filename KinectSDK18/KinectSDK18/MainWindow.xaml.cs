@@ -14,6 +14,11 @@ using System.Windows.Shapes;
 
 using Microsoft.Kinect;
 using Coding4Fun.Kinect.Wpf;
+//Speech references
+using Microsoft.Speech.AudioFormat;
+using Microsoft.Speech.Recognition;
+using System.IO;
+
 
 namespace KinectSDK18
 {
@@ -39,6 +44,7 @@ namespace KinectSDK18
             sensor.ColorFrameReady += runtime_VideoFrameReady;
             sensor.DepthFrameReady += new EventHandler<DepthImageFrameReadyEventArgs>(runtime_DepthFrameReady);
             sensor.Start();
+            KinectAudio();
             sensor.ElevationAngle = (int)sliderAngle.Value;
         }
 
@@ -90,6 +96,24 @@ namespace KinectSDK18
             }
         }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////Method to attach ellispses to hands using coding4fun wpf////////////////////////////////////////////////////////////    
+                private void ScalePosition(FrameworkElement element, Joint joint)
+                {
+                 //convert the value to X/Y
+                Joint scaledJoint = joint.ScaleTo(640, 480,1f,1f);// Needs adjusting 
+
+                   //convert & scale (.3 = means 1/3 of joint distance)
+               // Joint scaledJoint = joint.ScaleTo(1280, 720, .3f, .3f);
+
+                 Canvas.SetLeft(element, scaledJoint.Position.X);
+                  Canvas.SetTop(element, scaledJoint.Position.Y); 
+
+                }
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -168,22 +192,6 @@ namespace KinectSDK18
       
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         
-   
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////Method to attach ellispses to hands using coding4fun wpf////////////////////////////////////////////////////////////    
-                private void ScalePosition(FrameworkElement element, Joint joint)
-                {
-                 //convert the value to X/Y
-                Joint scaledJoint = joint.ScaleTo(640, 480,);// Needs adjusting 
-
-                   //convert & scale (.3 = means 1/3 of joint distance)
-                //Joint scaledJoint = joint.ScaleTo(1280, 720, .3f, .3f);
-
-                 Canvas.SetLeft(element, scaledJoint.Position.X);
-                  Canvas.SetTop(element, scaledJoint.Position.Y); 
-
-                }
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -197,10 +205,107 @@ namespace KinectSDK18
                 {
                     sensor.ElevationAngle = (int)sliderAngle.Value;
                 }
-
-        }
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////Code used for audio commands/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        private SpeechRecognitionEngine speechEngine;
+
+        private static RecognizerInfo GetKinectRecognizer()//Gets data for the speech recognizer(accoustic model) most suitable to process audio from kinect device.
+        {
+            foreach (RecognizerInfo recognizer in SpeechRecognitionEngine.InstalledRecognizers())
+            {
+                string value;
+                recognizer.AdditionalInfo.TryGetValue("Kinect", out value);
+                if ("True".Equals(value, StringComparison.OrdinalIgnoreCase) && "en-US".Equals(recognizer.Culture.Name, StringComparison.OrdinalIgnoreCase))
+                {
+                    return recognizer;
+                }
+            }
+
+            return null;
+        }
+
+        private void KinectAudio()
+        {
+
+            RecognizerInfo ri = GetKinectRecognizer();
+
+            this.speechEngine = new SpeechRecognitionEngine(ri.Id);
+
+                //Use this code to create grammar programmatically rather than from
+                //a grammar file.
+                 
+                 var directions = new Choices();
+                 directions.Add(new SemanticResultValue("red", "RED"));
+                 directions.Add(new SemanticResultValue("blue", "BLUE"));
+                 directions.Add(new SemanticResultValue("green", "GREEN"));
+                 directions.Add(new SemanticResultValue("black", "BLACK"));
+       
+                 var gb = new GrammarBuilder { Culture = ri.Culture };
+                 gb.Append(directions);
+                
+                 var g = new Grammar(gb);
+                 speechEngine.LoadGrammar(g);
+               
+
+              /*  // Create a grammar from grammar definition XML file.
+                using (var memoryStream = new MemoryStream(Encoding.ASCII.GetBytes(Grammar1.xml here)))
+                {
+                    var g = new Grammar(memoryStream);
+                    speechEngine.LoadGrammar(g);
+                }
+            */
+                speechEngine.SpeechRecognized += SpeechRecognized;
+
+                // For long recognition sessions (a few hours or more), it may be beneficial to turn off adaptation of the acoustic model. 
+                // This will prevent recognition accuracy from degrading over time.
+                ////speechEngine.UpdateRecognizerSetting("AdaptationOn", 0);
+
+                speechEngine.SetInputToAudioStream(
+                    sensor.AudioSource.Start(), new SpeechAudioFormatInfo(EncodingFormat.Pcm, 16000, 16, 1, 32000, 2, null));
+                speechEngine.RecognizeAsync(RecognizeMode.Multiple);
+            }
+        
+
+
+     private void SpeechRecognized(object sender, SpeechRecognizedEventArgs e) //handler for speech reconginition
+        {
+            // Speech utterance confidence below which we treat speech as if it hadn't been heard
+            const double ConfidenceThreshold = 0.4;
+
+            if (e.Result.Confidence >= ConfidenceThreshold)
+            {
+                switch (e.Result.Semantics.Value.ToString())
+                {
+                    case "RED":
+                        head.Fill = new SolidColorBrush(Colors.Red);
+                        break;
+
+                    case "BLUE":
+                        head.Fill = new SolidColorBrush(Colors.Blue);
+                        break;
+
+                    case "GREEN":
+                        head.Fill = new SolidColorBrush(Colors.Green);
+                        break;
+
+                    case "BLACK":
+                        head.Fill = new SolidColorBrush(Colors.Black);
+                        break;
+                }
+            }
+        }
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+        }
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
  }

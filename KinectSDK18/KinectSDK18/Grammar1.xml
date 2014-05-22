@@ -1,0 +1,31 @@
+﻿<grammar version="1.0" xml:lang="en-US" root="rootRule" tag-format="semantics/1.0-literals" xmlns="http://www.w3.org/2001/06/grammar">
+  <rule id="rootRule">
+    <one-of>
+      <item>
+        <tag>RED</tag>
+        <one-of>
+          <item>shit</item>
+          <item> red </item>
+        </one-of>
+      </item>
+      <item>
+        <tag>BLUE</tag>
+        <one-of>
+          <item> blue </item>
+        </one-of>
+      </item>
+      <item>
+        <tag>GREEN</tag>
+        <one-of>
+          <item> green </item>
+        </one-of>
+      </item>
+      <item>
+        <tag>BLACK</tag>
+        <one-of>
+          <item> black </item>
+        </one-of>
+      </item>
+    </one-of>
+  </rule>
+</grammar>

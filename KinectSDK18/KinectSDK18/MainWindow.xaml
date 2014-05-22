@@ -8,9 +8,10 @@
         <Label Content="0" Height="28" Margin="660,0,326,128" Name="labelAngel" VerticalAlignment="Bottom" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
         <Button Content="Adjust" Height="23" HorizontalAlignment="Left" Margin="643,330,0,0" Name="btnSetAngle" VerticalAlignment="Top" Width="75" Click="btnSetAngle_Click" />
         <Canvas Height="480" HorizontalAlignment="Left" Name="canvas1" VerticalAlignment="Top" Width="640">
-            <Ellipse Canvas.Left="241" Canvas.Top="45" Height="40" Name="head" Stroke="Black" Width="40" Fill="Red" />
-            <Ellipse Canvas.Left="186" Canvas.Top="130" Height="40" Name="Lhand" Stroke="Black" Width="40" Fill="Red" />
+            <Ellipse Canvas.Left="241" Canvas.Top="45" Height="40" Name="head" Stroke="Black" Width="40" Fill="Green" />
+            <Ellipse Canvas.Left="186" Canvas.Top="130" Height="40" Name="Lhand" Stroke="Black" Width="40" Fill="Yellow" />
             <Ellipse Canvas.Left="326" Canvas.Top="143" Height="40" Name="Rhand" Stroke="Black" Width="40" Fill="Red" />
+            <Label Content="Say: &quot;Red&quot;, &quot;Green&quot;,&quot;Blue&quot;, or &quot;Black&quot;" Height="30" Name="label2" Width="288" Canvas.Left="166" Canvas.Top="362" FontSize="15" FontWeight="Bold" Background="White" />
         </Canvas>
         <Image Height="245" HorizontalAlignment="Left" Margin="700,23,0,0" Name="dImage" Stretch="Fill" VerticalAlignment="Top" Width="298" />
         <Label Content="Depth Camera View" Height="37" HorizontalAlignment="Left" Margin="776,285,0,0" Name="label1" VerticalAlignment="Top" Width="128" />
